@@ -34,8 +34,20 @@ config MSMB_CAMERA_DEBUG
 	---help---
 	  Enable printk() debug for msm camera 2.0
 
+menuconfig OPPO_CAMERA
+	bool "OPPO's variant of the camera stack"
+	depends on MSMB_CAMERA && MACH_OPPO
+	default n
+	---help---
+	  Enable the old OPPO camera code
+
 if MSMB_CAMERA
+if OPPO_CAMERA
+source "drivers/media/platform/msm/camera_oppo_v2/Kconfig"
+endif
+if !OPPO_CAMERA
 source "drivers/media/platform/msm/camera_v2/Kconfig"
+endif
 endif # MSMB_CAMERA
 
 source "drivers/media/platform/msm/vidc/Kconfig"
