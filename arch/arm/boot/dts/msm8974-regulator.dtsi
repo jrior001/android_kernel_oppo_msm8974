@@ -397,7 +397,8 @@
 		pm8941_l21: regulator-l21 {
 			regulator-min-microvolt = <2950000>;
 			regulator-max-microvolt = <2950000>;
-			qcom,init-voltage = <2950000>;
+			#qcom,init-voltage = <2950000>;
+			qcom,init-voltage = <3100000>;
 			status = "okay";
 		};
 	};
