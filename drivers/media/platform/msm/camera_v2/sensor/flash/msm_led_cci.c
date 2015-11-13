@@ -25,7 +25,7 @@
 //#define CONFIG_HARDWARE_TRIGGER
 //#define CONFIG_MSMB_CAMERA_DEBUG
 //#define CONFIG_HARDWARE_TEST
-#ifdef CONFIG_HARDWARE_TEST
+ifdef CONFIG_HARDWARE_TEST
 #define CONFIG_HARDWARE_TRIGGER
 #endif
 #undef CDBG
@@ -918,14 +918,6 @@ static int flash_proc_read(char *page, char **start, off_t off, int count,
 {
     ssize_t read_size = -EINVAL;
     int *pold_mode = &fctrl.led_info->test_mode;
-#ifdef VENDOR_EDIT
-/*oppo hufeng 20150314 add to avoid null pointer*/
-    if (!page)
-    {
-        pr_err("page is NULL pointer!!!\n");
-	 return -EINVAL;
-    }
-#endif
     if (*pold_mode >= 0)
         read_size = snprintf(page, PAGE_SIZE, "%d\n", *pold_mode);
     return read_size;
@@ -939,20 +931,6 @@ static int flash_proc_write(struct file *filp, const char __user *buff,
     int *pold_mode = &fctrl.led_info->test_mode;
     bool need_off = 0;
     bool need_on = 0;
-
-#ifdef VENDOR_EDIT
-/*oppo hufeng 20150314 add to avoid null pointer*/
-    pr_err("flash_proc write enter!\n");
-    if (!buff)
-    {
-        pr_err("buff is NULL pointer!!!\n");
-        return -EINVAL;
-    }
-
-    if (copy_from_user(temp, buff, 1)) 
-        return -EFAULT; 
-    sscanf(temp, "%d", &new_mode);
-#endif
 
     if (new_mode == *pold_mode) {
         pr_err("the same mode as old %d\n", *pold_mode);
