@@ -22,6 +22,9 @@
 #include <linux/of_platform.h>
 #include <linux/memory.h>
 #include <linux/regulator/machine.h>
+#ifdef CONFIG_MACH_N3
+#include <linux/regulator/consumer.h> //ranfei
+#endif
 #include <linux/regulator/krait-regulator.h>
 #include <linux/msm_tsens.h>
 #include <linux/msm_thermal.h>
@@ -169,6 +172,49 @@ static void __init oppo_config_ramconsole(void)
 	}
 }
 
+#ifdef CONFIG_MACH_N3
+int __init board_sim_regulator_init(void)
+{
+	int rc;
+	struct regulator *vdd_regulator_ldo9=0;
+	struct regulator *vdd_regulator_lvs2=0;
+
+	/*zhangzhilong add for SIM1*/
+	printk( "zwx---power on l9");
+	if(!vdd_regulator_ldo9) {
+		vdd_regulator_ldo9 = regulator_get(NULL, "8941_l9");
+		if (IS_ERR(vdd_regulator_ldo9)) {
+			rc = PTR_ERR(vdd_regulator_ldo9);
+			printk( "zwx---Regulator get failed vcc_ana rc=%d\n", rc);
+			return rc;
+		}
+
+		rc = regulator_set_voltage(vdd_regulator_ldo9, 1800000, 1800000);
+		if (rc) {
+			printk("zwx---regulator set_vtg failed rc=%d\n", rc);
+		}
+	}
+
+	printk( "zwx---power on lvs2");
+	if(!vdd_regulator_lvs2) {
+		vdd_regulator_lvs2 = regulator_get(NULL, "8941_lvs2");
+		if (IS_ERR(vdd_regulator_lvs2)) {
+			rc = PTR_ERR(vdd_regulator_lvs2);
+			printk( "zwx---Regulator get failed vcc_ana rc=%d\n", rc);
+			return rc;
+		}
+
+		rc = regulator_set_voltage(vdd_regulator_lvs2, 1800000, 1800000);
+		if (rc) {
+			printk("zwx---regulator set_vtg failed rc=%d\n", rc);
+		}
+	}
+	regulator_enable(vdd_regulator_lvs2);
+
+	return 0;
+}
+#endif
+
 static struct rpm_regulator* sns_reg = 0;
 static struct delayed_work sns_dwork;
 
@@ -220,6 +266,14 @@ static struct of_dev_auxdata msm8974_auxdata_lookup[] __initdata = {
 			"usb_bam", NULL),
 	OF_DEV_AUXDATA("qcom,spi-qup-v2", 0xF9924000, \
 			"spi_qsd.1", NULL),
+	OF_DEV_AUXDATA("qcom,msm-sdcc", 0xF9824000, \
+			"msm_sdcc.1", NULL),
+	OF_DEV_AUXDATA("qcom,msm-sdcc", 0xF98A4000, \
+			"msm_sdcc.2", NULL),
+	OF_DEV_AUXDATA("qcom,msm-sdcc", 0xF9864000, \
+			"msm_sdcc.3", NULL),
+	OF_DEV_AUXDATA("qcom,msm-sdcc", 0xF98E4000, \
+			"msm_sdcc.4", NULL),
 	OF_DEV_AUXDATA("qcom,sdhci-msm", 0xF9824900, \
 			"msm_sdcc.1", NULL),
 	OF_DEV_AUXDATA("qcom,sdhci-msm", 0xF98A4900, \
@@ -272,6 +326,9 @@ void __init msm8974_init(void)
 	oppo_config_display();
 	oppo_config_ramconsole();
 	oppo_config_sns_power();
+#ifdef CONFIG_MACH_N3
+	board_sim_regulator_init();
+#endif
 }
 
 static const char *msm8974_dt_match[] __initconst = {
